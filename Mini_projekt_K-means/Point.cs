@@ -5,20 +5,20 @@ namespace Mini_projekt_K_means
 {
     public class Point
     {
-        public readonly List<double> _coordinate;
-        private string _name;
+        public readonly List<double> Coordinate;
+        public readonly string Name;
 
         public Point(double x, double y, double z, double t, string name)
         {
 
-            _coordinate = new List<double>
+            Coordinate = new List<double>
             {
                 x,
                 y,
                 z,
                 t
             };
-            _name = name;
+            Name = name;
         }
 
         public static double GiveDistanceBetweenPoints(Point point1, Point point2)
@@ -26,7 +26,7 @@ namespace Mini_projekt_K_means
             double result = 0;
             for (int i = 0; i < 4; i++)
             {
-                result += Math.Pow(point1._coordinate[i] - point2._coordinate[i], 2);
+                result += Math.Pow(point1.Coordinate[i] - point2.Coordinate[i], 2);
             }
 
             return Math.Sqrt(result);

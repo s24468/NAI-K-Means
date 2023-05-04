@@ -102,13 +102,13 @@ namespace Mini_projekt_K_means
             {
                 for (var i = 0; i < 4; i++)
                 {
-                    average._coordinate[i] += point._coordinate[i];
+                    average.Coordinate[i] += point.Coordinate[i];
                 }
             }
 
             for (var i = 0; i < 4; i++)
             {
-                average._coordinate[i] /= list.Count;
+                average.Coordinate[i] /= list.Count;
             }
 
             return average;

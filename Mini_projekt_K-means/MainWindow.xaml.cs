@@ -1,20 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using System.Windows.Documents;
 
 namespace Mini_projekt_K_means
 {
@@ -29,11 +19,10 @@ namespace Mini_projekt_K_means
             var dataProvider =
                 new DataProvider(@"C:\Users\Jarek\RiderProjects\Mini_projekt_K-means\Mini_projekt_K-means\iris.data");
             var points = dataProvider._Points;
-            var algorithm = new Algorithm(4, 100);
-            List<List<Point>> groupPoint = new List<List<Point>>();
-            (points, groupPoint) = algorithm.getGroups(points);
+            var algorithm = new Algorithm(3, 1000);
+            (points, var groupPoint) = algorithm.getGroups(points);
 
-            int iterations = 0;
+            var iterations = 0;
             bool hasChanged;
             do
             {
@@ -42,41 +31,45 @@ namespace Mini_projekt_K_means
             } while (hasChanged && iterations < algorithm.MaxIterarion);
 
             DisplayResults(groupPoint);
-          
         }
-        
-        private void DisplayResults(List<List<Point>> resultList2)
+
+        private void DisplayResults(List<List<Point>> list)
         {
-            // Załóżmy, że resultList to lista list punktów otrzymana po klasteryzacji
-            List<List<Point>> resultList = resultList2;
-        
-            int clusterIndex = 1;
+            var resultList = list ?? throw new Exception(nameof(list) + " IS EMPTY");
+
+            var clusterIndex = 1;
+
+            var paragraph = new Paragraph();
+            textBox.Document.Blocks.Add(paragraph);
+
             foreach (var cluster in resultList)
             {
-                textBox.AppendText($"Klaster {clusterIndex}:\n");
-        
+                paragraph.Inlines.Add(new Run($"Klaster {clusterIndex}:\n") { Foreground = Brushes.Black });
+
                 foreach (var point in cluster)
                 {
-                    textBox.AppendText($"X: {point._coordinate[0]}, Y: {point._coordinate[1]}, Z: {point._coordinate[2]}, T: {point._coordinate[3]}\n");
+                    paragraph.Inlines.Add(
+                        new Run(
+                                $"X: {point.Coordinate[0]}, Y: {point.Coordinate[1]}, Z: {point.Coordinate[2]}, T: {point.Coordinate[3]}, name: ")
+                            { Foreground = Brushes.Black });
+
+                    switch (point.Name)
+                    {
+                        case "Iris-setosa":
+                            paragraph.Inlines.Add(new Run($"{point.Name}\n") { Foreground = Brushes.Red });
+                            break;
+                        case "Iris-versicolor":
+                            paragraph.Inlines.Add(new Run($"{point.Name}\n") { Foreground = Brushes.Blue });
+                            break;
+                        default:
+                            paragraph.Inlines.Add(new Run($"{point.Name}\n") { Foreground = Brushes.Green });
+                            break;
+                    }
                 }
-        
-                textBox.AppendText("\n");
+
+                paragraph.Inlines.Add(new Run($"\n"));
+
                 clusterIndex++;
-            }
-        }
-        
-
-        private static void showListPoints(List<Point> points)
-        {
-            int i = 0;
-            foreach (var point in points)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    Console.Write(point._coordinate[j] + " ");
-                }
-
-                Console.WriteLine();
             }
         }
     }
