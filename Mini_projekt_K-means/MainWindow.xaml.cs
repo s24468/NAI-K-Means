@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Documents;
 
 namespace Mini_projekt_K_means
 {
@@ -19,20 +17,33 @@ namespace Mini_projekt_K_means
             var dataProvider =
                 new DataProvider(@"C:\Users\Jarek\RiderProjects\Mini_projekt_K-means\Mini_projekt_K-means\iris.data");
             var points = dataProvider._Points;
-            var algorithm = new Algorithm(3, 1000);
-            (points, var groupPoint) = algorithm.getGroups(points);
-
+            var algorithm = new Algorithm(10, 100);
+            (points, var groupPoint) = algorithm.GetGroups(points);
             var iterations = 0;
+            List<double> sumList = new List<double>();
             bool hasChanged;
+            double sum = 0;
             do
             {
-                hasChanged = Algorithm.AssignPoints(groupPoint, points);
+                
+                (hasChanged, sum) = Algorithm.AssignPoints(groupPoint, points);
+                sumList.Add(sum);
                 iterations++;
-            } while (hasChanged && iterations < algorithm.MaxIterarion);
+            } while (hasChanged && iterations < algorithm.MaxIterarion);//iterations
+            DisplaySumsOfIterations(sumList);
 
             DisplayResults(groupPoint);
         }
 
+        private void DisplaySumsOfIterations(List<double> sumList)
+        {
+            var paragraph = new Paragraph();
+            textBox.Document.Blocks.Add(paragraph);
+            for (int j = 0; j < sumList.Count; j++)
+            {
+                paragraph.Inlines.Add(new Run($"Iteration {(j+1)} : {sumList[j]}:\n") { Foreground = Brushes.Black });
+            }
+        }
         private void DisplayResults(List<List<Point>> list)
         {
             var resultList = list ?? throw new Exception(nameof(list) + " IS EMPTY");

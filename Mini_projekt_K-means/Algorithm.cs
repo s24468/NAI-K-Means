@@ -14,7 +14,7 @@ namespace Mini_projekt_K_means
             MaxIterarion = maxIterarion;
         }
 
-        public (List<Point>, List<List<Point>>) getGroups(List<Point> list)
+        public (List<Point>, List<List<Point>>) GetGroups(List<Point> list)//tylko centroidy
         {
             var dataPoint = list;
             var groupPoint = new List<List<Point>>();
@@ -32,20 +32,24 @@ namespace Mini_projekt_K_means
             return (dataPoint, groupPoint);
         }
 
-        public static bool AssignPoints(List<List<Point>> groupPoint, List<Point> dataPoint)
+        public static (bool, double) AssignPoints(List<List<Point>> groupPoint, List<Point> dataPoint)
         {
-            bool changed = false;
+            var changed = false;
 
             var newGroupPoint = new List<List<Point>>();
-
+            double sum = 0;
+            //aby było tyle grup ile potrzeba 
             foreach (var group in groupPoint)
             {
                 newGroupPoint.Add(new List<Point>());
             }
 
+            //dopisywanie/kopiowanie centroidów
+            double blankValue = 0;
             for (int i = 0; i < groupPoint.Count; i++)
             {
-                int closestCentroidIndex = GiveClosestCentroidIndex(groupPoint, groupPoint[i][0]);
+                (int closestCentroidIndex, blankValue) =
+                    GiveClosestCentroidIndexAndMinDistance(groupPoint, groupPoint[i][0]);
 
                 newGroupPoint[closestCentroidIndex].Add(groupPoint[i][0]);
                 if (!groupPoint[closestCentroidIndex].Contains(groupPoint[i][0]))
@@ -54,13 +58,20 @@ namespace Mini_projekt_K_means
                 }
             }
 
+
             foreach (var point in dataPoint)
             {
-                var closestCentroidIndex = GiveClosestCentroidIndex(groupPoint, point);
+                //do której grupy
+                double distance = 0;
+                (var closestCentroidIndex, distance) = GiveClosestCentroidIndexAndMinDistance(groupPoint, point);
 
                 newGroupPoint[closestCentroidIndex].Add(point);
-
+                sum += distance;
+                
+                //warunek "kiedy przydziały do grup pozostaną niezmienione w dwóch kolejnych iteracjach"
+                //sprawdź czy był w grupie z tym centroidem
                 // Jeśli punkt został przypisany do innej grupy, ustaw wartość `changed` na `true`.
+
                 if (!groupPoint[closestCentroidIndex].Contains(point))
                 {
                     changed = true;
@@ -73,16 +84,16 @@ namespace Mini_projekt_K_means
                 groupPoint[i] = newGroupPoint[i];
             }
 
-            return changed;
+            return (changed, sum);
         }
-
-        private static int GiveClosestCentroidIndex(List<List<Point>> groupPoint, Point point)
+//do której grupu punkt 
+        private static (int, double) GiveClosestCentroidIndexAndMinDistance(List<List<Point>> groupPoint, Point point)
         {
             var minDistance = double.MaxValue;
             var closestCentroidIndex = 0;
             for (var i = 0; i < groupPoint.Count; i++)
             {
-                var centroid = giveCentroid(groupPoint[i]);
+                var centroid = GiveCentroid(groupPoint[i]);//z każdym nowym punktem razem jest nowy centroid
                 var distance = Point.GiveDistanceBetweenPoints(centroid, point);
 
                 if (distance < minDistance)
@@ -92,10 +103,10 @@ namespace Mini_projekt_K_means
                 }
             }
 
-            return closestCentroidIndex;
+            return (closestCentroidIndex, minDistance);
         }
 
-        private static Point giveCentroid(List<Point> list)
+        private static Point GiveCentroid(List<Point> list)
         {
             var average = new Point(0, 0, 0, 0, "średnia");
             foreach (var point in list)
